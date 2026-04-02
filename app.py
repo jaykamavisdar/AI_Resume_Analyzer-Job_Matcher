@@ -96,14 +96,24 @@ def compute_tf(tokens):
     total = len(tokens) if tokens else 1
     return {term: freq / total for term, freq in count.items()}
 
+# def compute_idf(doc_tokens_list):
+#     """IDF across a small corpus (resume + JD)."""
+#     N = len(doc_tokens_list)
+#     all_terms = set(t for tokens in doc_tokens_list for t in tokens)
+#     idf = {}
+#     for term in all_terms:
+#         df = sum(1 for tokens in doc_tokens_list if term in tokens)
+#         idf[term] = math.log(N / df) if df else 0
+#     return idf
 def compute_idf(doc_tokens_list):
     """IDF across a small corpus (resume + JD)."""
     N = len(doc_tokens_list)
     all_terms = set(t for tokens in doc_tokens_list for t in tokens)
     idf = {}
     for term in all_terms:
-        df = sum(1 for tokens in doc_tokens_list if term in tokens)
-        idf[term] = math.log(N / df) if df else 0
+        df = sum(1 for tokens in doc_tokens_list if term in set(tokens))
+        # +1 smoothing so shared terms don't collapse to log(1)=0
+        idf[term] = math.log((N + 1) / (df + 1)) + 1
     return idf
 
 def tfidf_vector(tf, idf, vocab):
